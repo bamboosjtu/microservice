@@ -1,37 +1,31 @@
 package me.bamboo.accountcore.controller;
 
-import me.bamboo.accountcore.model.Account;
-import me.bamboo.accountcore.model.SearchPreference;
-import me.bamboo.accountcore.repository.AccountRepository;
-import me.bamboo.accountcore.repository.SearchPreferenceRepository;
-import me.bamboo.accountcore.kafka.EventProducer;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import me.bamboo.accountcore.service.AccountService;
+
+
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/account")
 public class AccountController {
 
-    @Autowired
-    private AccountRepository accountRepo;
+	@Autowired
+	private AccountService accountService;
+    
 
-    @Autowired
-    private SearchPreferenceRepository prefRepo;
-
-    @Autowired
-    private EventProducer producer;
-
-    @PostMapping("/accounts")
-    public Account createAccount(@RequestBody Account account) {
-        Account saved = accountRepo.save(account);
-        producer.sendAccountCreatedEvent(saved);
-        return saved;
+    @PostMapping("/create-mock-accounts")
+    public ResponseEntity createAccount() {
+        this.accountService.mockAccounts();
+        return ResponseEntity.ok().build();        
+    }
+    
+    @GetMapping("/{id}")
+    public ResponseEntity<AccountService.MockAccountDTO> getAccount(@PathVariable("id") Long id){
+    	AccountService.MockAccountDTO dto = this.accountService.getAccount(id);
+    	return ResponseEntity.ok().body(dto);
     }
 
-    @PostMapping("/preferences")
-    public SearchPreference savePreference(@RequestBody SearchPreference preference) {
-        SearchPreference saved = prefRepo.save(preference);
-        producer.sendPreferenceCreatedEvent(saved);
-        return saved;
-    }
+
 }
