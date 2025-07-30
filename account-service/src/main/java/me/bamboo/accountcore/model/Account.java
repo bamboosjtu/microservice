@@ -4,7 +4,6 @@ import org.apache.commons.csv.CSVRecord;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -28,6 +27,7 @@ public class Account {
     private String gender;
     
     public static Account buildFromCsv(CSVRecord record) {
+
     	return Account.builder()
     			.id(Long.valueOf(record.get("id")))
     			.firstname(record.get("first_name"))

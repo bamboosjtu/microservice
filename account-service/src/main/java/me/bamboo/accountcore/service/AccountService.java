@@ -1,5 +1,6 @@
 package me.bamboo.accountcore.service;
 
+
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -52,10 +53,9 @@ public class AccountService {
 	}
 
 	public MockAccountDTO getAccount(Long id) {
-		return this.accountRepo.findById(id)
-				.map(acc -> new MockAccountDTO(acc.getId(), acc.getFirstname(), acc.getLastname(), acc.getEmail(),
-						acc.getGender()))
-				.orElseThrow(() -> new EntityNotFoundException("Account hasn't been found with id " + id));
+		return this.accountRepo.findById(id).map(acc -> new MockAccountDTO(acc.getId(), acc.getFirstname(), acc.getLastname(), acc.getEmail(), acc.getGender()))
+		        .orElseThrow(() -> new EntityNotFoundException("Account hasn't been found with id " + id));
+
 	}
 
 }
