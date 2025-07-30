@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/accountdb
+    username: booksys
+    password: booksys
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+
