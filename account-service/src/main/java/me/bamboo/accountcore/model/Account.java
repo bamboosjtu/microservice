@@ -6,6 +6,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,13 +23,19 @@ public class Account {
 
 	@Id
     private Long id;
+	
+	@NotBlank
     private String firstname;
+	
+	@NotBlank
     private String lastname;
+	
+	@NotBlank
     private String email;
+	
     private String gender;
     
     public static Account buildFromCsv(CSVRecord record) {
-
     	return Account.builder()
     			.id(Long.valueOf(record.get("id")))
     			.firstname(record.get("first_name"))

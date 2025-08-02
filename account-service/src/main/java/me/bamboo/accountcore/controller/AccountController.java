@@ -21,7 +21,7 @@ public class AccountController {
         return ResponseEntity.ok().build();        
     }
     
-    @GetMapping("/{id}")
+    @GetMapping( "/{id}")
     public ResponseEntity<AccountService.MockAccountDTO> getAccount(@PathVariable("id") Long id){
     	AccountService.MockAccountDTO dto = this.accountService.getAccount(id);
     	return ResponseEntity.ok().body(dto);

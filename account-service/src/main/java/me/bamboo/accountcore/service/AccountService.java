@@ -18,16 +18,18 @@ import org.springframework.stereotype.Service;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-
+import me.bamboo.accountcore.message.KafkaDispatcher;
 import me.bamboo.accountcore.model.Account;
 import me.bamboo.accountcore.repository.AccountRepository;
+import me.bamboo.common.AccountCreatedEvent;
 
 @Service
 @Slf4j
 public class AccountService {
 	@Autowired
 	private AccountRepository accountRepo;
-
+	@Autowired
+	private KafkaDispatcher dispatcher;
 	@Autowired
 	private ResourceLoader resourceLoader;
 
@@ -38,10 +40,10 @@ public class AccountService {
 				Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 				CSVParser parser = CSVFormat.DEFAULT.withDelimiter(',').withIgnoreSurroundingSpaces().withFirstRecordAsHeader().parse(reader)) {
 //			System.out.println("Total records: " + parser.getRecords().size());
-			for (CSVRecord record : parser) {
-				Account acc = Account.buildFromCsv(record);
-				Account saved = accountRepo.save(acc);
-				System.out.println(saved);
+			for (CSVRecord item : parser) {
+				Account acc = Account.buildFromCsv(item);
+				Account savedAccount = accountRepo.save(acc);
+				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail(), savedAccount.getGender()));
 			}
 		} catch (Exception e) {
 			log.error("Error loading CSV data: {}", e.getMessage(), e);
