@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import me.bamboo.accountcore.message.KafkaDispatcher;
 import me.bamboo.accountcore.model.Account;
@@ -25,6 +25,7 @@ import me.bamboo.common.AccountCreatedEvent;
 
 @Service
 @Slf4j
+@Transactional(transactionManager = "transactionManager")
 public class AccountService {
 	@Autowired
 	private AccountRepository accountRepo;
@@ -32,8 +33,7 @@ public class AccountService {
 	private KafkaDispatcher dispatcher;
 	@Autowired
 	private ResourceLoader resourceLoader;
-
-	@Transactional
+	
 	public void mockAccounts() {
 		Resource resource = resourceLoader.getResource("classpath:data.csv");
 		try (InputStream is = resource.getInputStream();

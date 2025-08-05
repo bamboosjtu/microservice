@@ -5,8 +5,10 @@
 - [ ] account（/api/v1/account/）:
   - [x] create account api（POST /create-mock-accounts、GET /{id}），and save to posgres
   - [x] AccountCreatedEvent
-  - [ ] create searchpreference and save to postgres（POST /preferences）
-  - [ ] SearchPreferenceCreatedEvent
+  - [x] create searchpreference and save to postgres（POST /preferences）
+  - [x] SearchPreferenceCreatedEvent
+- [ ] percolator
+  - [ ] listen on SearchPreferenceCreatedEvent
 
 ![sequence diagram](C:\Users\theTruth\Documents\projects\book-recommendation-system\sequence diagram.webp)
 
@@ -16,13 +18,13 @@
 
 
 
-| 事件名                            | 建议 Topic 名称                |
-| --------------------------------- | ------------------------------ |
-| `AccountCreatedEvent`             | `account.created`              |
-| `SearchPreferenceCreatedEvent`    | `search.preference.created`    |
-| `BookCreatedEvent`                | `book.created`                 |
-| `SearchPreferenceMatchedEvent`    | `search.preference.matched`    |
-| `EmailNotificationTriggeredEvent` | `notification.email.triggered` |
+| 事件名                            | 建议 Topic 名称                   |
+| --------------------------------- | --------------------------------- |
+| `AccountCreatedEvent`             | `account-created-topic`           |
+| `SearchPreferenceCreatedEvent`    | `search-preference-created-topic` |
+| `BookCreatedEvent`                | `book.created`                    |
+| `SearchPreferenceMatchedEvent`    | `search.preference.matched`       |
+| `EmailNotificationTriggeredEvent` | `notification.email.triggered`    |
 
 
 
@@ -31,11 +33,12 @@
  
  # 启动Kafka
  .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+ 
  .\bin\windows\kafka-server-start.bat .\config\server.properties
  
  # 测试Kafka功能
  # 1.创建主题
- .\bin\windows\kafka-topics.bat --create --topic accountcreated-topic \
+ .\bin\windows\kafka-topics.bat --create --topic account-created-topic \
 --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 
 # 2.查看主题列表

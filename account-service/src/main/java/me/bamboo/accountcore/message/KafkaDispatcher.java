@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bamboo.common.AccountCreatedEvent;
+import me.bamboo.common.SearchPreferenceCreatedEvent;
 
 @Slf4j
 @Component
@@ -23,6 +24,9 @@ public class KafkaDispatcher {
 	
 	@Value("${app.kafka.account.topic}")
 	private String accountTopic;
+	
+	@Value("${app.kafka.search-preference.topic}")
+	private String SearchPreferenceTopic;
 
 
 	public void send(AccountCreatedEvent accountCreatedEvent) {
@@ -30,13 +34,18 @@ public class KafkaDispatcher {
 		this.template.send(accountTopic, event);	
 	}
 	
-	private String serialize(AccountCreatedEvent accountCreatedEvent) {
-		try {
-			return this.om.writeValueAsString(accountCreatedEvent);
-		} catch (JsonProcessingException e) {
-			log.warn("AccountCreatedEvent {} created error.", e.getMessage());
-		}
-		return "AccountCreatedEvent Error";
+	public void send(SearchPreferenceCreatedEvent searchPreferenceCreatedEvent) {
+		String event = serialize(searchPreferenceCreatedEvent);
+		this.template.send(SearchPreferenceTopic, event);
+		
 	}
-
+	
+	private String serialize(Object event) {
+		try {
+			return this.om.writeValueAsString(event);
+		} catch (JsonProcessingException e) {
+			log.warn("Event {} exsits error.", e.getMessage());
+		}
+		return "Event Error";
+	}
 }

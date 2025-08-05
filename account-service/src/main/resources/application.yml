@@ -1,27 +1,27 @@
 server:
-  port: 8081
+    port: 8081
 
 spring:
-  datasource:
-    url: jdbc:postgresql://localhost:15432/accountdb
-    username: booksys
-    password: booksys
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  kafka:
-    bootstrap-servers: localhost:9092
-    consumer:
-      group-id: account-group
-      auto-offset-reset: earliest
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-    producer:
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    appication:
+        name: book-recommendation-system
+    datasource:
+        url: jdbc:postgresql://localhost:15432/accountdb
+        username: booksys
+        password: booksys
+    jpa:
+        hibernate:
+            ddl-auto: update
+            show-sql: true
+    kafka:
+        bootstrap-servers: localhost:9092
+        producer:
+#            transaction-id-prefix: tx-${spring.application.name}
+            key-serializer: org.apache.kafka.common.serialization.StringSerializer
+            value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 app:
     kafka:
         account:
-            topic: accountcreated-topic
+            topic: account-created-topic
+        search-preference:
+            topic: search-preference-created-topic
