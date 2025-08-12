@@ -1,9 +1,9 @@
 server:
-    port: 8081
+    port: 18081
 
 spring:
-    appication:
-        name: book-recommendation-system
+    application:
+        name: account-service
     datasource:
         url: jdbc:postgresql://localhost:15432/accountdb
         username: booksys

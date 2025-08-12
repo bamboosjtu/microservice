@@ -1,0 +1,31 @@
+server:
+    port: 18083
+spring:
+    application:
+        name: percolator-service
+    kafka:
+        bootstrap-servers: localhost:9092
+        consumer:
+            value-serializer: org.apache.kafka.common.serialization.StringDeserializer
+            key-serializer: org.apache.kafka.common.serialization.StringDeserializer
+            group-id: ${spring.application.name}
+            auto-offset-reset: latest
+            enable-auto-commit: false
+            properties:
+                isolation.level: read_committed
+    elasticsearch:
+        uris: http://localhost:9200
+app:
+    kafka:
+        account:
+            topic: account-created-topic
+        search-preference:
+            topic: search-preference-created-topic
+        book:
+            topic: book-created-topic
+
+logging:
+    level:
+        me.bamboo: debug
+    pattern:
+        console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

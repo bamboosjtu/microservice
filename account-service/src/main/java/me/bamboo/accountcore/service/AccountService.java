@@ -39,11 +39,12 @@ public class AccountService {
 		try (InputStream is = resource.getInputStream();
 				Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 				CSVParser parser = CSVFormat.DEFAULT.withDelimiter(',').withIgnoreSurroundingSpaces().withFirstRecordAsHeader().parse(reader)) {
-//			System.out.println("Total records: " + parser.getRecords().size());
+			log.debug("Total {} account records were created", parser.getRecords().size());
 			for (CSVRecord item : parser) {
-				Account acc = Account.buildFromCsv(item);
-				Account savedAccount = accountRepo.save(acc);
-				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail(), savedAccount.getGender()));
+				Account account = Account.buildFromCsv(item);
+				Account savedAccount = accountRepo.save(account);
+				log.debug("Account saving process has been finished. {}", savedAccount);
+				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId().toString(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail(), savedAccount.getGender()));
 			}
 		} catch (Exception e) {
 			log.error("Error loading CSV data: {}", e.getMessage(), e);

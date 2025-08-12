@@ -26,8 +26,9 @@ public class SearchPrefenceService {
 				.criteria(new SearchPreference.Criteria(dto.author(), dto.minPrice(), dto.maxPrice(), dto.types()))
 				.build();
 		SearchPreference saved = this.repository.save(searchPreference);
+		log.debug("SearchPreference saving process has been finished. {}", saved);
 		Criteria criteria = saved.getCriteria();
-		this.dispatcher.send(new SearchPreferenceCreatedEvent(saved.getId(), saved.getTitle(), saved.getEmail(),
+		this.dispatcher.send(new SearchPreferenceCreatedEvent(saved.getId().toString(), saved.getTitle(), saved.getEmail(),
 				criteria.author(), criteria.minPrice(), criteria.maxPrice(), criteria.types()));
 		return saved.getId();
 	}

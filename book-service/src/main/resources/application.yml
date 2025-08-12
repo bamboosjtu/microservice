@@ -1,11 +1,11 @@
 server:
-    port: 18081
+    port: 18082
 
 spring:
     application:
-        name: account-service
+        name: book-service
     datasource:
-        url: jdbc:postgresql://localhost:15432/accountdb
+        url: jdbc:postgresql://localhost:15432/bookdb
         username: booksys
         password: booksys
     jpa:
@@ -21,7 +21,5 @@ spring:
 
 app:
     kafka:
-        account:
-            topic: account-created-topic
-        search-preference:
-            topic: search-preference-created-topic
+        book:
+            topic: book-created-topic

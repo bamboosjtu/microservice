@@ -32,19 +32,20 @@ public class KafkaDispatcher {
 	public void send(AccountCreatedEvent accountCreatedEvent) {
 		String event = serialize(accountCreatedEvent);
 		this.template.send(accountTopic, event);	
+		log.debug("Sending message {} to {}", event, accountTopic);
 	}
 	
 	public void send(SearchPreferenceCreatedEvent searchPreferenceCreatedEvent) {
 		String event = serialize(searchPreferenceCreatedEvent);
 		this.template.send(SearchPreferenceTopic, event);
-		
+		log.debug("Sending message {} to {}", event, SearchPreferenceTopic);
 	}
 	
 	private String serialize(Object event) {
 		try {
 			return this.om.writeValueAsString(event);
 		} catch (JsonProcessingException e) {
-			log.warn("Event {} exsits error.", e.getMessage());
+			log.warn("{} Event Send exsits error.", e.getMessage());
 		}
 		return "Event Error";
 	}

@@ -16,7 +16,7 @@ public class SearchPreferenceController {
 	private SearchPrefenceService service;
     
 
-    @PostMapping("/create-mock-accounts")
+    @PostMapping
     public ResponseEntity<Long> save(@RequestBody SearchPreferenceDTO dto) {
         this.service.save(dto);
         return ResponseEntity.ok().build();        
