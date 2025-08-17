@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bamboo.common.BookCreatedEvent;
+import me.bamboo.common.book.BookCreatedEvent;
 
 @Slf4j
 @Component

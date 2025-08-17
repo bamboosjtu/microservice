@@ -21,7 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import me.bamboo.accountcore.message.KafkaDispatcher;
 import me.bamboo.accountcore.model.Account;
 import me.bamboo.accountcore.repository.AccountRepository;
-import me.bamboo.common.AccountCreatedEvent;
+import me.bamboo.common.account.AccountCreatedEvent;
 
 @Service
 @Slf4j
@@ -34,31 +34,34 @@ public class AccountService {
 	@Autowired
 	private ResourceLoader resourceLoader;
 	
-	public void mockAccounts() {
+	public int mockAccounts() {
 		Resource resource = resourceLoader.getResource("classpath:data.csv");
+		int count = 0; 
 		try (InputStream is = resource.getInputStream();
 				Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
-				CSVParser parser = CSVFormat.DEFAULT.withDelimiter(',').withIgnoreSurroundingSpaces().withFirstRecordAsHeader().parse(reader)) {
-			log.debug("Total {} account records were created", parser.getRecords().size());
+				CSVParser parser = CSVFormat.DEFAULT.withDelimiter(',').withIgnoreSurroundingSpaces().withFirstRecordAsHeader().parse(reader)) {			
 			for (CSVRecord item : parser) {
 				Account account = Account.buildFromCsv(item);
 				Account savedAccount = accountRepo.save(account);
 				log.debug("Account saving process has been finished. {}", savedAccount);
-				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId().toString(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail(), savedAccount.getGender()));
+				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail()));
+				count++;
 			}
+			log.debug("Total {} account records were created", count);
+			return count;
 		} catch (Exception e) {
 			log.error("Error loading CSV data: {}", e.getMessage(), e);
 		}
+		return 0;
 
 	}
 
-	public record MockAccountDTO(Long id, String firstname, String lastname, String email, String gender) {
+	public record MockAccountDTO(Long id, String firstname, String lastname, String email) {
 	}
 
 	public MockAccountDTO getAccount(Long id) {
-		return this.accountRepo.findById(id).map(acc -> new MockAccountDTO(acc.getId(), acc.getFirstname(), acc.getLastname(), acc.getEmail(), acc.getGender()))
+		return this.accountRepo.findById(id).map(acc -> new MockAccountDTO(acc.getId(), acc.getFirstname(), acc.getLastname(), acc.getEmail()))
 		        .orElseThrow(() -> new EntityNotFoundException("Account hasn't been found with id " + id));
 
 	}
-
 }

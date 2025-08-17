@@ -32,8 +32,6 @@ public class Account {
 	
 	@NotBlank
     private String email;
-	
-    private String gender;
     
     public static Account buildFromCsv(CSVRecord record) {
     	return Account.builder()
@@ -41,7 +39,6 @@ public class Account {
     			.firstname(record.get("first_name"))
     			.lastname(record.get("last_name"))
     			.email(record.get("email"))
-    			.gender(record.get("gender"))
     			.build();
     }
 }

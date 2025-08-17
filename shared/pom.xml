@@ -21,10 +21,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- Kafka JSON 序列化支持 -->
+        <!-- JSON 序列化支持 -->
         <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
 
         <!-- 其他通用工具库可选 -->

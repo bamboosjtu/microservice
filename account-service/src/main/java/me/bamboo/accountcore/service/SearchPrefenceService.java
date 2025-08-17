@@ -10,7 +10,7 @@ import me.bamboo.accountcore.message.KafkaDispatcher;
 import me.bamboo.accountcore.model.SearchPreference;
 import me.bamboo.accountcore.model.SearchPreference.Criteria;
 import me.bamboo.accountcore.repository.SearchPreferenceRepository;
-import me.bamboo.common.SearchPreferenceCreatedEvent;
+import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
 
 @Service
 @Slf4j
@@ -22,14 +22,13 @@ public class SearchPrefenceService {
 	private KafkaDispatcher dispatcher;
 
 	public Long save(SearchPreferenceDTO dto) {
-		SearchPreference searchPreference = SearchPreference.builder().title(dto.title()).email(dto.email())
+		SearchPreference searchPreference = SearchPreference.builder().title(dto.title())
 				.criteria(new SearchPreference.Criteria(dto.author(), dto.minPrice(), dto.maxPrice(), dto.types()))
 				.build();
 		SearchPreference saved = this.repository.save(searchPreference);
 		log.debug("SearchPreference saving process has been finished. {}", saved);
 		Criteria criteria = saved.getCriteria();
-		this.dispatcher.send(new SearchPreferenceCreatedEvent(saved.getId().toString(), saved.getTitle(), saved.getEmail(),
-				criteria.author(), criteria.minPrice(), criteria.maxPrice(), criteria.types()));
+		this.dispatcher.send(new SearchPreferenceCreatedEvent(saved.getId().toString(), saved.getTitle(), criteria.author(), criteria.minPrice(), criteria.maxPrice(), criteria.types()));
 		return saved.getId();
 	}
 

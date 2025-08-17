@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bamboo.common.AccountCreatedEvent;
-import me.bamboo.common.SearchPreferenceCreatedEvent;
+import me.bamboo.common.account.AccountCreatedEvent;
+import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
 
 @Slf4j
 @Component

@@ -17,8 +17,8 @@ public class AccountController {
 
     @PostMapping("/create-mock-accounts")
     public ResponseEntity createAccount() {
-        this.accountService.mockAccounts();
-        return ResponseEntity.ok().build();        
+        int count = this.accountService.mockAccounts();
+        return ResponseEntity.ok().body(count);        
     }
     
     @GetMapping( "/{id}")

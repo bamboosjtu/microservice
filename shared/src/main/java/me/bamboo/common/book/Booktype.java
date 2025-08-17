@@ -1,4 +1,4 @@
-package me.bamboo.common;
+package me.bamboo.common.book;
 
 public enum Booktype {
 	FICTION, DRAMA, ROMANTIC

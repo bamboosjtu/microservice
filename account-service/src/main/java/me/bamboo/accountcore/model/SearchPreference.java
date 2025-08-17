@@ -13,7 +13,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.bamboo.common.Booktype;
+import me.bamboo.common.book.Booktype;
 
 @Entity
 @Table(name = "search-preference")
@@ -30,11 +30,8 @@ public class SearchPreference {
 	
 	private String title;
 	
-	private String email;
-	
 	@Embedded
-	private Criteria criteria;
-	
+	private Criteria criteria;	
 	
 	public record Criteria(String author, BigDecimal minPrice, BigDecimal maxPrice, Booktype[] types) {
 		

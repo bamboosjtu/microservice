@@ -17,8 +17,8 @@
   - [x] send BookCreatedEvent
 - [ ] percolator
   - [x] listen on SearchPreferenceCreatedEvent
+  - [x] save SearchPreference Query to ES
   - [x] listen on BookCreatedEvent
-  - [ ] save SearchPreference to ES
   - [ ] percolate new Book on saved SearchPreference queries in ES
   - [ ] send SearchPreferenceTriggeredEvent
 - [ ] notification
@@ -62,8 +62,8 @@ Kafaka的默认端口是9092。
 # （2）查看主题列表
 .\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
 
-# （3）删除主题
-.\bin\windows\kafka-topics.bat --delete --topic accountcreated-topic --bootstrap-server localhost:9092
+# （3）删除主题，似乎总是遇到问题，直接删除/tmp/kafka-logs和/tmp/zookeeper
+.\bin\windows\kafka-topics.bat --delete --topic account-created-topic --bootstrap-server localhost:9092
 
 # 3.测试消息功能
 # （1）启动生产者
@@ -72,6 +72,132 @@ Kafaka的默认端口是9092。
 # （2）启动消费者
 .\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic account-created-topic --from-beginning
 ```
+
+
+
+### 事件驱动微服务架构：契约接口
+
+```java
+package me.bamboo.common.base;
+
+import java.time.Instant;
+import java.util.UUID;
+/*
+接口设计概览
+EventContract<T> 接口是一个泛型接口，它定义了一个事件（Event）所必须包含的标准元数据（metadata）。接口的核心思想是为所有事件提供一个统一的“信封”（Event Envelope），这种设计模式在事件驱动架构（Event-Driven Architecture, EDA）中非常常见，无论事件的业务内容是什么，它都必须包含一套标准的元数据，这对于事件的追踪、审计和处理至关重要。
+
+该接口的主要设计目标是：
+- 标准化事件数据：无论事件的具体业务内容是什么，每个事件都必须符合这个统一的契约，包含一套标准的字段，如 ID、时间戳、来源等。这对于跨多个微服务进行事件处理和监控至关重要。
+- 支持泛型：通过使用 <T> 泛型，该接口能够适应任何类型的业务数据负载（Payload），使得一个通用的接口可以被多个不同的业务事件所实现。例如，UserCreatedEvent 可以实现 EventContract<UserCreatedPayload>，而 OrderShippedEvent 可以实现 EventContract<OrderShippedPayload>。
+*/
+public interface EventContractor<T> {
+	String version = "1.0";
+	
+	UUID getId();//事件的唯一标识符。这对于事件的幂等性处理和追踪非常重要。
+	String getSource();//表示生成此事件的微服务或系统。这对于调试和理解事件流至关重要。
+	String getType();//事件的类型，通常是一个动词的过去式，表示一个已经发生的动作，例如 "user.created" 或 "order.shipped"。这使消费者能够根据事件类型决定如何处理它。
+	String getVersion();//事件契约的版本号。这很重要，因为它允许对事件的信封结构进行演进，而不会破坏旧版本的兼容性。
+	Instant getCreated();//事件创建时的 UTC 时间戳。这是事件时序和审计的关键信息。
+	UUID getCorrelationId();//关联 ID。这是该设计中的一个关键且强大的概念。它用于将一系列逻辑上相关的事件串联起来。例如，一个用户的创建事件可能触发下游服务生成一个欢迎邮件事件，这两个事件会共享同一个 correlationId。这对于分布式系统中的端到端事务追踪和可观察性（Observability）至关重要。
+	T getPayload();//事件的实际业务内容。这是泛型 <T> 的用武之地。例如，一个订单事件的 Payload 可能包含订单号、商品列表和总价等信息。
+	String getAggregateId();//这是一个可选字段，但非常重要。它通常指向一个业务实体（如用户ID或订单号）。如果多个事件与同一个业务实体相关，并且需要按顺序处理（例如，order.created 和 order.updated），则可以使用 aggregateId 来确保消息按顺序处理，或者至少让消费者知道何时需要处理顺序问题。	
+}
+```
+
+
+
+采用了一种分层的、事件驱动的设计模式，主要分为两个层次，[在线展示UML](http://www.plantuml.com/plantuml/uml)。
+
+1. **通用层：定义了所有事件的**通用契约和基础实现**，确保了事件模型的标准化。
+2. **领域层 **：专注于业务事件**，它继承和扩展了通用层的功能，将业务数据和类型安全封装在事件中。
+
+```
+@startuml
+
+' -------------------- Base Package --------------------
+package "common.base" {
+    interface EventContract<T> {
+        +getId()
+        +getSource()
+        +getType()
+        +getVersion()
+        +getCreated()
+        +getCorrelationId()
+        +getPayload()
+        +getAggregateId()
+    }
+
+    class DomainEvent<T> {
+        -id
+        -source
+        -type
+        -version
+        -created
+        -correlationId
+        -aggregateId
+        -payload
+    }
+
+    DomainEvent ..|> EventContract
+}
+
+
+' -------------------- Account Package --------------------
+package "common.account" {
+    abstract class AccountEvent {
+        -eventType
+        +getEventName()
+    }
+
+    class AccountCreatedEvent {
+        -id
+        -lastName
+        -firstName
+        -email
+    }
+
+    class AccountDomainEvent<T> {
+        +SOURCE
+    }
+
+    ' Relationships
+    AccountCreatedEvent --|> AccountEvent
+    AccountDomainEvent  --|> DomainEvent
+
+    ' Composition/Aggregation (AccountDomainEvent has a Payload of type T, which extends AccountEvent)
+    AccountDomainEvent o-- AccountEvent : T payload
+  
+}
+@enduml
+```
+
+![PlantUML diagram](https://cdn-0.plantuml.com/plantuml/png/bP8zSzGm48Px_OebJP89Fdg6oIIO53IGIGpzHjwpDUZ38ya7Dy1_HoVva6pi0ZKdF_TgF_RTE-VH-b59zihtf0W6YKApNhG4N5WkATsT9ql67mTYx1AgbGFlqH4y8l-67Qqgs33zUS6DKaRlNj3H1Vna48xG8SCUES73WRIlZVOMkN_Nt2P1F3ST-O_jrVKCF9lHSbh0vZWiqLUoJXYzeBKbzDGkgR6M9FgW_oVV8nwbmIMzxpfB7Nhwg__DuW-Nw1nyC0g5ZgtDMwf4c-ykjfA_mxoBhqDg80EUQYz0MNR6c6lBS4Xj5AMMHS9kz-jsRWKBgYtlxpate_R_Pp-cH-SDm1SNyqmJcqB64ifvKG3HtdByIVO95Is6NuQQh8xIBGU2FeR9P2_i4f528JVJR5fzy_pvorFzK3wyXAV9BzUBmKMsLcrL1JVAYPJAqhQaBCWvJstKO9mufNfptjLmXwkL83qwG9Zs7CmUJdi8pMlutWlU0_tmfDkvGzTR1Pcy7GcyXGRoxeMbkWl1HYN_0000)
+
+
+
+### 序列化与反序列化
+
+`jackson-annotations` 是 **Jackson 库的核心模块之一**，它的作用是提供一组 **Java 注解（Annotations）**，用于控制 **JSON 与 Java 对象之间的序列化（Serialization）和反序列化（Deserialization）行为**。它是 Jackson 三大核心模块之一：
+
+| 模块                  | 作用                                         |
+| --------------------- | -------------------------------------------- |
+| `jackson-core`        | 核心流式 API（`JsonParser`,`JsonGenerator`） |
+| `jackson-databind`    | 对象绑定（`ObjectMapper`）                   |
+| `jackson-annotations` | 注解支持（控制序列化/反序列化行为）          |
+
+`jackson-annotations`它不包含运行时逻辑，只提供 **注解定义**，这些注解被 `jackson-databind`（如 `ObjectMapper`）在运行时读取，从而影响 JSON 处理行为。
+
+#### 常用注解
+
+| 注解                  | 作用                                                  |
+| --------------------- | ----------------------------------------------------- |
+| @JsonProperty("name") | 字段命名控制，指定 JSON 中的字段名                    |
+| @JsonIgnore           | 忽略该字段                                            |
+| @JsonIgnoreProperties | 全局忽略某些属性（类级别）                            |
+| @JsonInclude          | 全局控制 null/empty 字段是否序列化                    |
+| @JsonTypeInfo         | 全局策略，启用类型信息                                |
+| @JsonTypeName         | 给一个类指定一个逻辑名称，一般与@JsonTypeInfo搭配使用 |
+| @JsonSubTypes         | 定义子类型映射，一般与@JsonTypeInfo搭配使用           |
 
 
 
@@ -90,9 +216,7 @@ cd C:\tools\kibana-9.0.0-rc1\
 
 ```
 
-### 
-
-### ES基本概念
+###  ES基本概念
 
 v8后有较大升级。
 
@@ -114,6 +238,70 @@ IK 分词：我爱 / 北京 / 天安门
 ```
 
 因此，如果数据里有中文（搜索、匹配、过滤等），IK 分词几乎是必装。
+
+### 反向查询percolator
+
+在 Elasticsearch 中，**percolator 索引初始化**的核心步骤包括：创建索引 → 设置 `percolator` 字段 → 定义映射 → 注册查询。下面是详细流程，基于 **Elasticsearch 9.x + Spring Boot** 环境。
+
+#### STEP1：创建索引并定义mapping
+
+`query` 字段必须是 `percolator` 类型。其他字段存放用户的元信息或条件。
+
+```http
+PUT /percolator_index
+{
+  "mappings": {
+    "properties": {
+      "query": {
+        "type": "percolator"
+      },
+      "price": {
+        "type": "double"
+      },
+      "booktype":{
+        "type": "keyword"
+      }
+    }
+  }
+}
+```
+
+#### STEP2：注册反向查询
+
+每个用户的偏好条件就是一条 **percolator 查询文档**，比如：
+
+```http
+POST /search-preferences/_doc/1
+{
+  "query": {
+    "bool": {
+      "filter": [
+        { "terms": { "booktype": ["ROMANTIC"] } },
+        { "range": { "price": { "gte": 50 } } }
+      ]
+    }
+  }
+}
+```
+
+#### STEP3：测试反向查询
+
+传入一条新文档，看看哪些规则匹配它：
+
+```http
+POST /search-preferences/_search
+{
+  "query": {
+    "percolate": {
+      "field": "query",
+      "document": {
+        "booktype": "ROMANTIC",
+        "price": 100.0
+      }
+    }
+  }
+}
+```
 
 
 

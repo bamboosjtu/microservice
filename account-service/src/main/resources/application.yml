@@ -25,3 +25,9 @@ app:
             topic: account-created-topic
         search-preference:
             topic: search-preference-created-topic
+
+logging:
+    level:
+        me.bamboo: debug
+    pattern:
+        console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"

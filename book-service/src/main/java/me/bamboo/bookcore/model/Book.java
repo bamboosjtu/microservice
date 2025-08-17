@@ -12,7 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.bamboo.common.Booktype;
+import me.bamboo.common.book.Booktype;
 
 @Entity
 @Table(name = "book")

@@ -9,8 +9,8 @@ import me.bamboo.bookcore.controller.BookDTO;
 import me.bamboo.bookcore.message.KafkaDispatcher;
 import me.bamboo.bookcore.model.Book;
 import me.bamboo.bookcore.repository.BookRepository;
-import me.bamboo.common.BookCreatedEvent;
-import me.bamboo.common.Booktype;
+import me.bamboo.common.book.BookCreatedEvent;
+import me.bamboo.common.book.Booktype;
 
 @Slf4j
 @Service
@@ -24,8 +24,7 @@ public class BookService {
 		Book saved = this.repository.save(Book.builder().title(dto.title()).author(dto.author()).price(dto.price())
 				.booktype(Booktype.valueOf(dto.type())).build());
 		log.debug("Book saving process has been finished. {}", saved);
-		dispatcher.send(new BookCreatedEvent(saved.getId().toString(), saved.getTitle(), saved.getAuthor(),
-				saved.getPrice(), saved.getBooktype()));
+		dispatcher.send(new BookCreatedEvent(saved.getId(), saved.getTitle(), saved.getAuthor(),saved.getPrice(), saved.getBooktype()));
 		return saved.getId();
 	}
 
