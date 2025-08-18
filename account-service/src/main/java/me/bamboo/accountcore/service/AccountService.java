@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.util.UUID;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -21,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import me.bamboo.accountcore.message.KafkaDispatcher;
 import me.bamboo.accountcore.model.Account;
 import me.bamboo.accountcore.repository.AccountRepository;
+
 import me.bamboo.common.account.AccountCreatedEvent;
+import me.bamboo.common.account.AccountDomainEvent;
+import me.bamboo.common.account.AccountEvent;
 
 @Service
 @Slf4j
@@ -44,7 +49,14 @@ public class AccountService {
 				Account account = Account.buildFromCsv(item);
 				Account savedAccount = accountRepo.save(account);
 				log.debug("Account saving process has been finished. {}", savedAccount);
-				this.dispatcher.send(new AccountCreatedEvent(savedAccount.getId(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail()));
+				var event = AccountDomainEvent.<AccountCreatedEvent>builder()
+						.id(UUID.randomUUID())
+                        .type(AccountEvent.EventType.ACCOUNT_CREATED.getEventName())
+                        .created(Instant.now())
+                        .source(AccountDomainEvent.SOURCE)
+                        .payload(new AccountCreatedEvent(savedAccount.getId().toString(), savedAccount.getFirstname(), savedAccount.getLastname(), savedAccount.getEmail()))
+                        .build();
+				this.dispatcher.send((AccountDomainEvent) event);
 				count++;
 			}
 			log.debug("Total {} account records were created", count);

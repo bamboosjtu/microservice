@@ -21,6 +21,8 @@ app:
             topic: account-created-topic
         search-preference:
             topic: search-preference-created-topic
+        search-preference-triggered:
+            topic: search-preference-triggered-topic
         book:
             topic: book-created-topic
 

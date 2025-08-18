@@ -2,6 +2,7 @@ package me.bamboo.common.search_preference;
 
 import java.beans.ConstructorProperties;
 import java.math.BigDecimal;
+import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -33,5 +34,11 @@ public class SearchPreferenceCreatedEvent extends SearchPreferenceEvent{
         this.maxPrice = maxPrice;
         this.types = types;
     }
+	
+	@Override
+	public String toString() {
+		return "SearchPreferenceCreatedEvent [id=" + id + ", title=" + title + ", email=" + email + ", author=" + author
+				+ ", minPrice=" + minPrice + ", maxPrice=" + maxPrice + ", types=" + Arrays.toString(types) + "]";
+	}
 
 }

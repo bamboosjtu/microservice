@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bamboo.common.account.AccountCreatedEvent;
-import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
+import me.bamboo.common.account.AccountDomainEvent;
+import me.bamboo.common.search_preference.SearchPreferenceDomainEvent;
 
 @Slf4j
 @Component
@@ -29,13 +29,13 @@ public class KafkaDispatcher {
 	private String SearchPreferenceTopic;
 
 
-	public void send(AccountCreatedEvent accountCreatedEvent) {
+	public void send(AccountDomainEvent accountCreatedEvent) {
 		String event = serialize(accountCreatedEvent);
 		this.template.send(accountTopic, event);	
 		log.debug("Sending message {} to {}", event, accountTopic);
 	}
 	
-	public void send(SearchPreferenceCreatedEvent searchPreferenceCreatedEvent) {
+	public void send(SearchPreferenceDomainEvent searchPreferenceCreatedEvent) {
 		String event = serialize(searchPreferenceCreatedEvent);
 		this.template.send(SearchPreferenceTopic, event);
 		log.debug("Sending message {} to {}", event, SearchPreferenceTopic);

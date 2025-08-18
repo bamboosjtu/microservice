@@ -20,4 +20,10 @@ public class SearchPreferenceTriggeredEvent extends SearchPreferenceEvent {
         super(EventType.SEARCH_PREFERENCE_TRIGGERED);
         this.id = id;
     }
+
+	@Override
+	public String toString() {
+		return "SearchPreferenceTriggeredEvent [id=" + id + ", eventType=" + eventType + "]";
+	}
+
 }

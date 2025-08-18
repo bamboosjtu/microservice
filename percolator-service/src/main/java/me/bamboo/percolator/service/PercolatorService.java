@@ -1,30 +1,38 @@
 package me.bamboo.percolator.service;
 
+import java.io.IOException;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
-import org.springframework.data.elasticsearch.core.query.IndexQuery;
 import org.springframework.data.elasticsearch.core.query.IndexQueryBuilder;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import co.elastic.clients.elasticsearch._types.FieldValue;
-import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
 import co.elastic.clients.json.JsonData;
+
 import lombok.extern.slf4j.Slf4j;
+
 import me.bamboo.common.book.BookCreatedEvent;
+import me.bamboo.common.book.BookDomainEvent;
 import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
+import me.bamboo.common.search_preference.SearchPreferenceDomainEvent;
+import me.bamboo.common.search_preference.SearchPreferenceEvent;
+import me.bamboo.common.search_preference.SearchPreferenceTriggeredEvent;
 
 @Slf4j
 @Service
@@ -35,10 +43,14 @@ public class PercolatorService {
 	private ElasticsearchOperations operations;
 	
 	@Autowired
+	private ElasticsearchClient client;
+	
+	@Autowired
 	private ObjectMapper objectMapper;  	
 
-	public void save(SearchPreferenceCreatedEvent spc) {
-		log.info("Percollator Query saving process has been starting with {}.", spc.toString());
+	public void save(SearchPreferenceDomainEvent domainEvent) {
+		SearchPreferenceCreatedEvent spc = (SearchPreferenceCreatedEvent) domainEvent.getPayload();
+		log.info("反向查询 starting with {}.", spc.toString());
 
 		// 构建布尔查询
 		var boolQuery = getBoolQueryBuilder(spc);
@@ -46,9 +58,9 @@ public class PercolatorService {
 		// 构建文档：{ "query": { ... } }
 		Map<String, Object> source = new HashMap<>();
 		source.put("query", boolQuery);
-		log.debug("boolQuery is {}", source);
+		log.debug("反向查询语句 is {}", source);
 		
-		// 创建索引操作
+		// 创建索引操作并执行，PUT /search-preferences/_doc
 		try {
 			String jsonSource = objectMapper.writeValueAsString(source);
 			var indexQuery =  new IndexQueryBuilder()
@@ -108,7 +120,57 @@ public class PercolatorService {
         return query;
     }
 
-	public void findMatches(BookCreatedEvent bookCreatedEvent) {
-		log.info("Percollator Query saving process has been starting with {}.", bookCreatedEvent.toString());
+	public List<SearchPreferenceDomainEvent<SearchPreferenceTriggeredEvent>> findMatches(BookDomainEvent domainEvent) {
+		BookCreatedEvent bookCreatedEvent = (BookCreatedEvent) domainEvent.getPayload();
+		
+		log.debug("文档匹配 has been starting with {}.", bookCreatedEvent.toString());
+		
+		Map<String, Object> doc = new HashMap<>();
+		doc.put("booktype", bookCreatedEvent.getType().name());
+		doc.put("price", bookCreatedEvent.getPrice().doubleValue());
+
+		try {
+			String jsonString = objectMapper.writeValueAsString(doc);
+			SearchRequest request = SearchRequest.of(s -> s
+	                .index(PERCOLATOR_INDEX)
+	                .query(q -> q
+	                        .percolate(p -> p
+	                                .field("query")
+	                                .document(JsonData.fromJson(jsonString))
+	                )
+	        ));
+			log.debug("书籍匹配查询语句 is {}", request);	
+			
+			SearchResponse<Map> response = client.search(request, Map.class);
+			
+			List<SearchPreferenceDomainEvent<SearchPreferenceTriggeredEvent>> events = new ArrayList<>();
+			for (Hit<Map> hit : response.hits().hits()) {
+				try {
+		            // 获取 _source 并转成 JSON
+		            Map<String, Object> sourceMap = hit.source();
+		            if (sourceMap != null) {
+		            	var event = SearchPreferenceDomainEvent.<SearchPreferenceTriggeredEvent>builder()
+		            		.id(UUID.randomUUID())
+		            		.type(SearchPreferenceEvent.EventType.SEARCH_PREFERENCE_TRIGGERED.getEventName())
+		            		.correlationId(domainEvent.getId()) //chaining domain events
+		            		.created(Instant.now())
+		            		.source(SearchPreferenceDomainEvent.SOURCE)
+		            		.payload(new SearchPreferenceTriggeredEvent(hit.id()))
+		            		.build();
+		                events.add(event);
+		            }
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		        }
+			}		
+			log.debug("response of SearchPreferenceTriggeredEvents is {}.", events);
+			return events;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}	
+		return List.of();
+
 	}
+	
 }

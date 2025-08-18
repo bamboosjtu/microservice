@@ -1,5 +1,8 @@
 package me.bamboo.accountcore.service;
 
+import java.time.Instant;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +14,8 @@ import me.bamboo.accountcore.model.SearchPreference;
 import me.bamboo.accountcore.model.SearchPreference.Criteria;
 import me.bamboo.accountcore.repository.SearchPreferenceRepository;
 import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
+import me.bamboo.common.search_preference.SearchPreferenceDomainEvent;
+import me.bamboo.common.search_preference.SearchPreferenceEvent;
 
 @Service
 @Slf4j
@@ -28,7 +33,14 @@ public class SearchPrefenceService {
 		SearchPreference saved = this.repository.save(searchPreference);
 		log.debug("SearchPreference saving process has been finished. {}", saved);
 		Criteria criteria = saved.getCriteria();
-		this.dispatcher.send(new SearchPreferenceCreatedEvent(saved.getId().toString(), saved.getTitle(), criteria.author(), criteria.minPrice(), criteria.maxPrice(), criteria.types()));
+		var event = SearchPreferenceDomainEvent.<SearchPreferenceCreatedEvent>builder()
+				.id(UUID.randomUUID())
+                .type(SearchPreferenceEvent.EventType.SEARCH_PREFERENCE_CREATED.getEventName())
+                .created(Instant.now())
+                .source(SearchPreferenceDomainEvent.SOURCE)
+                .payload(new SearchPreferenceCreatedEvent(saved.getId().toString(), saved.getTitle(), criteria.author(), criteria.minPrice(), criteria.maxPrice(), criteria.types()))
+                .build();
+		this.dispatcher.send((SearchPreferenceDomainEvent) event);
 		return saved.getId();
 	}
 

@@ -19,8 +19,8 @@
   - [x] listen on SearchPreferenceCreatedEvent
   - [x] save SearchPreference Query to ES
   - [x] listen on BookCreatedEvent
-  - [ ] percolate new Book on saved SearchPreference queries in ES
-  - [ ] send SearchPreferenceTriggeredEvent
+  - [x] percolate new Book on saved SearchPreference queries in ES
+  - [x] send SearchPreferenceTriggeredEvent
 - [ ] notification
   - [ ] listen on EmailNotificationTriggeredEvent
   - [ ] send email with GOOGLE SMTP
@@ -35,13 +35,13 @@ Kafaka的默认端口是9092。
 
 
 
-| 事件名                            | 建议 Topic 名称                   |
-| --------------------------------- | --------------------------------- |
-| `AccountCreatedEvent`             | `account-created-topic`           |
-| `SearchPreferenceCreatedEvent`    | `search-preference-created-topic` |
-| `BookCreatedEvent`                | `book-created-topic`              |
-| `SearchPreferenceTriggeredEvent`  | `search.preference.triggered`     |
-| `EmailNotificationTriggeredEvent` | `notification.email.triggered`    |
+| 事件名                            | 建议 Topic 名称                     |
+| --------------------------------- | ----------------------------------- |
+| `AccountCreatedEvent`             | `account-created-topic`             |
+| `SearchPreferenceCreatedEvent`    | `search-preference-created-topic`   |
+| `BookCreatedEvent`                | `book-created-topic`                |
+| `SearchPreferenceTriggeredEvent`  | `search-preference-triggered-topic` |
+| `EmailNotificationTriggeredEvent` | `notification.email.triggered`      |
 
 
 
@@ -213,7 +213,6 @@ cd C:\tools\elasticsearch-9.1.0
 
 cd C:\tools\kibana-9.0.0-rc1\
 .\bin\kibana.bat
-
 ```
 
 ###  ES基本概念
@@ -239,13 +238,15 @@ IK 分词：我爱 / 北京 / 天安门
 
 因此，如果数据里有中文（搜索、匹配、过滤等），IK 分词几乎是必装。
 
-### 反向查询percolator
+### 反向查询（percolator）
 
-在 Elasticsearch 中，**percolator 索引初始化**的核心步骤包括：创建索引 → 设置 `percolator` 字段 → 定义映射 → 注册查询。下面是详细流程，基于 **Elasticsearch 9.x + Spring Boot** 环境。
+在 Elasticsearch 中，**percolator 索引初始化**的核心步骤包括：创建索引设置并定义映射  → 注册查询 → 匹配文档。下面是详细流程，基于 **Elasticsearch 9.x + Spring Boot** 环境。[官方文档](https://www.elastic.co/docs/reference/query-languages/query-dsl/query-dsl-percolate-query)。
 
 #### STEP1：创建索引并定义mapping
 
-`query` 字段必须是 `percolator` 类型。其他字段存放用户的元信息或条件。
+在映射（mapping）中，你需要为字段指定 `"type": "percolator"`，用于存储查询 DSL。其他字段存放用户的元信息或条件，虽然**QWEN**说不需要，但实测必须在mapping中加上，不然会报错。
+
+默认情况下，Elasticsearch **不会自动创建正确的 Percolator 映射**，即使你使用 `@Document` 注解。
 
 ```http
 PUT /percolator_index
@@ -266,12 +267,12 @@ PUT /percolator_index
 }
 ```
 
-#### STEP2：注册反向查询
+#### STEP2：注册查询
 
 每个用户的偏好条件就是一条 **percolator 查询文档**，比如：
 
 ```http
-POST /search-preferences/_doc/1
+POST /search-preferences/_doc
 {
   "query": {
     "bool": {
@@ -284,7 +285,7 @@ POST /search-preferences/_doc/1
 }
 ```
 
-#### STEP3：测试反向查询
+#### STEP3：匹配文档
 
 传入一条新文档，看看哪些规则匹配它：
 
@@ -303,6 +304,22 @@ POST /search-preferences/_search
 }
 ```
 
+#### 使用场景
+
+- **实时告警系统**：用户设置告警条件，当新日志或事件满足条件时触发通知。
+- **个性化推荐/订阅通知**：用户订阅关键词或条件，新内容发布时推送。
+- **规则引擎**：将业务规则以查询形式注册，新数据进入时自动触发规则。
+- **安全监控**：检测日志中是否出现可疑行为模式。
+
+#### 替代方案
+
+根据 Elastic 官方文档和社区实践，单个索引中注册的 percolator 查询数量应控制在 1,000 到 10,000 之间，超过后性能显著下降。部分替代方案如下：
+
+- **Elasticsearch Watcher + Transform**：用于告警。
+- **实时流处理（如 Kafka + Flink）**：做复杂事件处理（CEP）。
+- **专用规则引擎**：如 Drools。
+- **滚动索引 + 普通搜索**：反向思维：定期搜索“未通知的文档是否满足某些条件”。
+
 
 
 ## 容器部署
@@ -318,7 +335,5 @@ docker run --name elasticsearch \
     -e "xpack.security.enabled=false" \
     -p 9200:9200 -p 9300:9300 \
     docker.elastic.co/elasticsearch/elasticsearch:8.13.4
-    
-
 ```
 

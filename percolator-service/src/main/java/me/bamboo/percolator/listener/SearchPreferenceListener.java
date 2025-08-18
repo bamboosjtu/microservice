@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import me.bamboo.common.search_preference.SearchPreferenceCreatedEvent;
+import me.bamboo.common.search_preference.SearchPreferenceDomainEvent;
 import me.bamboo.percolator.service.PercolatorService;
 
 @Slf4j
@@ -30,9 +30,9 @@ public class SearchPreferenceListener {
 		});
 	}
 
-	private Optional<SearchPreferenceCreatedEvent> deserialize(String spc) {
+	private Optional<SearchPreferenceDomainEvent> deserialize(String spc) {
 		try {
-			return Optional.of(om.readValue(spc, SearchPreferenceCreatedEvent.class));
+			return Optional.of(om.readValue(spc, SearchPreferenceDomainEvent.class));
 		} catch (IOException e) {
 			log.warn("SearchPreferenceCreatedEvent Listen exsits error: {}", e.getMessage());
 		}

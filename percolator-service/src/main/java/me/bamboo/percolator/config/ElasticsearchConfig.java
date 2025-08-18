@@ -7,7 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.indices.CreateIndexResponse;
 import co.elastic.clients.elasticsearch.indices.ExistsRequest;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Configuration
 public class ElasticsearchConfig {
 	private static final String INDEX_NAME = "search-preferences";
@@ -24,7 +26,7 @@ public class ElasticsearchConfig {
 								.mappings(m -> m.properties("query", p -> p.percolator(pp -> pp))
 										.properties("price", p -> p.double_(tt -> tt))
 										.properties("booktype", p -> p.keyword(kk -> kk))));
-				System.out.println("Percolator 索引创建结果: " + response.acknowledged());
+				log.debug("Percolator 索引创建结果: " + response.acknowledged());
 			}
 		};
 	}

@@ -17,7 +17,7 @@ public class DomainEvent<T> implements EventContractor<T> {
 	private UUID id;
     private String source;
     private String type;
-    private String version;
+    private String version = "v1";
     private Instant created;
     private UUID correlationId;
     private String aggregateId;

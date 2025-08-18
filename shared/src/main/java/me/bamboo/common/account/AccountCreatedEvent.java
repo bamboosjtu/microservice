@@ -15,17 +15,25 @@ import lombok.Getter;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AccountCreatedEvent extends AccountEvent{
 	
-	private Long id;
+	private String id;
 	private String firstname;
 	private String lastname;
 	private String email;
 	
 	@JsonCreator
-	public AccountCreatedEvent(Long id, String firstname, String lastname, String email) {
+	public AccountCreatedEvent(String id, String firstname, String lastname, String email) {
 		super(EventType.ACCOUNT_CREATED);
 		this.id = id;
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.email = email;
 	}
+
+	@Override
+	public String toString() {
+		return "AccountCreatedEvent [id=" + id + ", firstname=" + firstname + ", lastname=" + lastname + ", email="
+				+ email + ", eventType=" + eventType + "]";
+	}
+	
+
 }
