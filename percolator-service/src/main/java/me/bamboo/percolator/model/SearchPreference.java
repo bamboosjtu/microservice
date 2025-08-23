@@ -15,6 +15,9 @@ public class SearchPreference {
 
 	@Field(type = FieldType.Keyword)
 	private String booktype;
+	
+	@Field(type = FieldType.Keyword)
+	private String email;
 
 	@Field(type = FieldType.Double)
 	private Double price;

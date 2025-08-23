@@ -40,7 +40,7 @@ public class BookListener {
 		try {
 			return Optional.of(om.readValue(spc, BookDomainEvent.class));
 		} catch (IOException e) {
-			log.warn("BookCreatedEvent Listen exsits error: {}", e.getMessage());
+			log.warn("BookCreatedEvent解析错误: {}", e.getMessage());
 		}
 		return Optional.empty();
 	}

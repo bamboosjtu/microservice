@@ -34,7 +34,7 @@ public class SearchPreferenceListener {
 		try {
 			return Optional.of(om.readValue(spc, SearchPreferenceDomainEvent.class));
 		} catch (IOException e) {
-			log.warn("SearchPreferenceCreatedEvent Listen exsits error: {}", e.getMessage());
+			log.warn("SearchPreferenceCreatedEvent解析错误: {}", e.getMessage());
 		}
 		return Optional.empty();
 	}

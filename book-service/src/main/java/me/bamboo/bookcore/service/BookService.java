@@ -29,7 +29,7 @@ public class BookService {
 	public Long save(BookDTO dto) {
 		Book saved = this.repository.save(Book.builder().title(dto.title()).author(dto.author()).price(dto.price())
 				.booktype(Booktype.valueOf(dto.type())).build());
-		log.debug("Book saving process has been finished. {}", saved);
+		log.debug("数据库写入：Book {}", saved);
 		var event = BookDomainEvent.<BookCreatedEvent>builder()
 				.id(UUID.randomUUID())
                 .type(BookEvent.EventType.BOOK_CREATED.getEventName())

@@ -4,6 +4,6 @@ import java.math.BigDecimal;
 
 import me.bamboo.common.book.Booktype;
 
-public record SearchPreferenceDTO(String title, String email, String author, BigDecimal minPrice, BigDecimal maxPrice, Booktype[] types) {
+public record SearchPreferenceDTO(String email, String title, String author, BigDecimal minPrice, BigDecimal maxPrice, Booktype[] types) {
 
 }

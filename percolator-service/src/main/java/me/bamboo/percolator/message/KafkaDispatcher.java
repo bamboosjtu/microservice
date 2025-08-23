@@ -32,7 +32,7 @@ public class KafkaDispatcher {
 	public void send(SearchPreferenceDomainEvent domainEvent) {
 		String event = serialize(domainEvent);
 		this.template.send(SearchPreferenceTriggeredEvent, event);
-		log.debug("Sending message {} to {}", event, SearchPreferenceTriggeredEvent);
+		log.debug("发送消息： {} to {}", event, SearchPreferenceTriggeredEvent);
 	}
 	
 	private String serialize(Object event) {

@@ -21,6 +21,16 @@ public class BookController {
         Long createdId = service.save(dto);
         return ResponseEntity.ok().body(createdId);        
     }
+    
+    @PostMapping("/bulk")
+    public ResponseEntity<Long> save(@RequestBody BookDTO[] dtos) {
+        Long count = 0L;
+        for(BookDTO dto : dtos) {
+        	service.save(dto);
+        	count++;
+        }
+        return ResponseEntity.ok().body(count);        
+    }
 
 
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import me.bamboo.common.account.AccountDomainEvent;
+import me.bamboo.common.notification.NotificationDomainEvent;
 import me.bamboo.common.search_preference.SearchPreferenceDomainEvent;
 
 @Slf4j
@@ -26,19 +27,28 @@ public class KafkaDispatcher {
 	private String accountTopic;
 	
 	@Value("${app.kafka.search-preference.topic}")
-	private String SearchPreferenceTopic;
+	private String searchPreferenceTopic;
+	
+	@Value("${app.kafka.notification.topic}")
+	private String notificationTopic;
 
 
 	public void send(AccountDomainEvent accountCreatedEvent) {
 		String event = serialize(accountCreatedEvent);
 		this.template.send(accountTopic, event);	
-		log.debug("Sending message {} to {}", event, accountTopic);
+		log.debug("发送消息： {} to {}", event, accountTopic);
 	}
 	
 	public void send(SearchPreferenceDomainEvent searchPreferenceCreatedEvent) {
 		String event = serialize(searchPreferenceCreatedEvent);
-		this.template.send(SearchPreferenceTopic, event);
-		log.debug("Sending message {} to {}", event, SearchPreferenceTopic);
+		this.template.send(searchPreferenceTopic, event);
+		log.debug("发送消息： {} to {}", event, searchPreferenceTopic);
+	}
+	
+	public void send(NotificationDomainEvent emailTriggeredEvent) {
+		String event = serialize(emailTriggeredEvent);
+		this.template.send(notificationTopic, event);
+		log.debug("发送消息： {} to {}", event, notificationTopic);
 	}
 	
 	private String serialize(Object event) {

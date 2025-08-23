@@ -50,14 +50,14 @@ public class PercolatorService {
 
 	public void save(SearchPreferenceDomainEvent domainEvent) {
 		SearchPreferenceCreatedEvent spc = (SearchPreferenceCreatedEvent) domainEvent.getPayload();
-		log.info("反向查询 starting with {}.", spc.toString());
-
 		// 构建布尔查询
 		var boolQuery = getBoolQueryBuilder(spc);
 		
 		// 构建文档：{ "query": { ... } }
 		Map<String, Object> source = new HashMap<>();
 		source.put("query", boolQuery);
+	       // 2. 邮箱匹配（email）
+		source.put("email", spc.getEmail());
 		log.debug("反向查询语句 is {}", source);
 		
 		// 创建索引操作并执行，PUT /search-preferences/_doc
@@ -142,6 +142,8 @@ public class PercolatorService {
 			log.debug("书籍匹配查询语句 is {}", request);	
 			
 			SearchResponse<Map> response = client.search(request, Map.class);
+			log.debug("书籍匹配查询结果 is {}", response);	
+			log.debug("书籍匹配查询结果 is {}", response.hits().hits());	
 			
 			List<SearchPreferenceDomainEvent<SearchPreferenceTriggeredEvent>> events = new ArrayList<>();
 			for (Hit<Map> hit : response.hits().hits()) {
@@ -155,7 +157,7 @@ public class PercolatorService {
 		            		.correlationId(domainEvent.getId()) //chaining domain events
 		            		.created(Instant.now())
 		            		.source(SearchPreferenceDomainEvent.SOURCE)
-		            		.payload(new SearchPreferenceTriggeredEvent(hit.id()))
+		            		.payload(new SearchPreferenceTriggeredEvent(hit.id(), (String) hit.source().get("email"), bookCreatedEvent.getTitle(), bookCreatedEvent.getAuthor()))//hit.source().get("query")
 		            		.build();
 		                events.add(event);
 		            }
@@ -172,5 +174,5 @@ public class PercolatorService {
 		return List.of();
 
 	}
-	
+//	String id, String email, String title
 }

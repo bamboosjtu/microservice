@@ -9,6 +9,7 @@
     <module>account-service</module>
     <module>percolator-service</module>
     <module>book-service</module>
+    <module>notification-service</module>
   </modules>
   <name>microservice</name>
   <description>Parent project for microservices</description>

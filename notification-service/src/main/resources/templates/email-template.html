@@ -1,0 +1,15 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Email Template</title>
+</head>
+<body>
+<h1>Dear <span th:text="${firstName}">Anonymous</span> <span th:text="${lastName}"></span>:</h1>
+
+<p><b th:text="${author}">无名氏</b>刚刚发表了《<b th:text="${title}">书名</b>》，快来阅读吧。</p>
+
+<p>-------------------------</p>
+<footer>From <span th:text="${email}">xxxx@xxx.com</span>.</footer>
+</body>
+</html>

@@ -28,6 +28,8 @@ public class SearchPreference {
 	@SequenceGenerator(name = "sequenceGenerator")	
 	private Long id;
 	
+	private String email;
+	
 	private String title;
 	
 	@Embedded

@@ -2,28 +2,38 @@
 
 [GITHUB 地址](https://github.com/lombocska/udemy-microservices-example/tree/master)
 
+## 项目总结
+
+1. 学习技术设计，按照时序图开发程序。
+2. 学习了消息队列和搜索引擎。
+3. 事件机制的设计模式。
+4. 相比原版教程，提升了一下版本，尤其是ES在v7以后，用法有比较大的变化。
+5. 在chatgpt的指导下编程。
 
 
-- [ ] account（/api/v1/account/）:
+
+## 接口清单
+
+- [x] account（/api/v1/account/）:
   - [x] create account api（POST /create-mock-accounts、GET /{id}），and save to posgres
   - [x] send AccountCreatedEvent
   - [x] create searchpreference and save to postgres（POST /preferences）
   - [x] send SearchPreferenceCreatedEvent
-  - [ ] listen on SearchPreferenceTriggeredEvent
-  - [ ] get accout for SearchPreference
-  - [ ] send EmailNotificationTriggeredEvent
-- [ ] book（/api/v1/book/）
+  - [x] listen on SearchPreferenceTriggeredEvent
+  - [x] get accout for SearchPreference
+  - [x] send EmailNotificationTriggeredEvent
+- [x] book（/api/v1/book/）
   - [x] save book to postgres
   - [x] send BookCreatedEvent
-- [ ] percolator
+- [x] percolator
   - [x] listen on SearchPreferenceCreatedEvent
   - [x] save SearchPreference Query to ES
   - [x] listen on BookCreatedEvent
   - [x] percolate new Book on saved SearchPreference queries in ES
   - [x] send SearchPreferenceTriggeredEvent
-- [ ] notification
-  - [ ] listen on EmailNotificationTriggeredEvent
-  - [ ] send email with GOOGLE SMTP
+- [x] notification
+  - [x] listen on EmailNotificationTriggeredEvent
+  - [x] send email with GOOGLE SMTP
 
 ![sequence diagram](C:\Users\theTruth\Documents\projects\book-recommendation-system\sequence diagram.webp)
 
@@ -35,13 +45,13 @@ Kafaka的默认端口是9092。
 
 
 
-| 事件名                            | 建议 Topic 名称                     |
-| --------------------------------- | ----------------------------------- |
-| `AccountCreatedEvent`             | `account-created-topic`             |
-| `SearchPreferenceCreatedEvent`    | `search-preference-created-topic`   |
-| `BookCreatedEvent`                | `book-created-topic`                |
-| `SearchPreferenceTriggeredEvent`  | `search-preference-triggered-topic` |
-| `EmailNotificationTriggeredEvent` | `notification.email.triggered`      |
+| 事件名                            | 建议 Topic 名称                      |
+| --------------------------------- | ------------------------------------ |
+| `AccountCreatedEvent`             | `account-created-topic`              |
+| `SearchPreferenceCreatedEvent`    | `search-preference-created-topic`    |
+| `BookCreatedEvent`                | `book-created-topic`                 |
+| `SearchPreferenceTriggeredEvent`  | `search-preference-triggered-topic`  |
+| `EmailNotificationTriggeredEvent` | `notification-email-triggered-topic` |
 
 
 
@@ -170,8 +180,6 @@ package "common.account" {
 }
 @enduml
 ```
-
-![PlantUML diagram](https://cdn-0.plantuml.com/plantuml/png/bP8zSzGm48Px_OebJP89Fdg6oIIO53IGIGpzHjwpDUZ38ya7Dy1_HoVva6pi0ZKdF_TgF_RTE-VH-b59zihtf0W6YKApNhG4N5WkATsT9ql67mTYx1AgbGFlqH4y8l-67Qqgs33zUS6DKaRlNj3H1Vna48xG8SCUES73WRIlZVOMkN_Nt2P1F3ST-O_jrVKCF9lHSbh0vZWiqLUoJXYzeBKbzDGkgR6M9FgW_oVV8nwbmIMzxpfB7Nhwg__DuW-Nw1nyC0g5ZgtDMwf4c-ykjfA_mxoBhqDg80EUQYz0MNR6c6lBS4Xj5AMMHS9kz-jsRWKBgYtlxpate_R_Pp-cH-SDm1SNyqmJcqB64ifvKG3HtdByIVO95Is6NuQQh8xIBGU2FeR9P2_i4f528JVJR5fzy_pvorFzK3wyXAV9BzUBmKMsLcrL1JVAYPJAqhQaBCWvJstKO9mufNfptjLmXwkL83qwG9Zs7CmUJdi8pMlutWlU0_tmfDkvGzTR1Pcy7GcyXGRoxeMbkWl1HYN_0000)
 
 
 

@@ -16,20 +16,21 @@ import me.bamboo.common.book.Booktype;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchPreferenceCreatedEvent extends SearchPreferenceEvent{
 	private String id;
-	private String title; 
 	private String email;
-	private String author;
+	private String title; 
+	private String author;	
 	private BigDecimal minPrice;
 	private BigDecimal maxPrice;
 	private Booktype[] types;
 	
 	@JsonCreator
-    @ConstructorProperties({"id", "title", "author", "minimumPrice", "maximumPrice", "types"})
-    public SearchPreferenceCreatedEvent(String id, String title, String author, BigDecimal minPrice, BigDecimal maxPrice, Booktype[] types) {
+    @ConstructorProperties({"id", "email","title", "author", "minimumPrice", "maximumPrice", "types"})
+    public SearchPreferenceCreatedEvent(String id, String email, String title, String author,  BigDecimal minPrice, BigDecimal maxPrice, Booktype[] types) {
         super(EventType.SEARCH_PREFERENCE_CREATED);
         this.id = id;
         this.title = title;
         this.author = author;
+        this.email = email;
         this.minPrice = minPrice;
         this.maxPrice = maxPrice;
         this.types = types;
@@ -37,7 +38,7 @@ public class SearchPreferenceCreatedEvent extends SearchPreferenceEvent{
 	
 	@Override
 	public String toString() {
-		return "SearchPreferenceCreatedEvent [id=" + id + ", title=" + title + ", email=" + email + ", author=" + author
+		return "SearchPreferenceCreatedEvent [id=" + id + ", email=" + email + ", title=" + title + ", author=" + author
 				+ ", minPrice=" + minPrice + ", maxPrice=" + maxPrice + ", types=" + Arrays.toString(types) + "]";
 	}
 

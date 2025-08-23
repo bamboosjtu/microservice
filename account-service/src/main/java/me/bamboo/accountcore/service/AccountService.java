@@ -76,4 +76,11 @@ public class AccountService {
 		        .orElseThrow(() -> new EntityNotFoundException("Account hasn't been found with id " + id));
 
 	}
+
+	public MockAccountDTO getAccount(String email) {
+		return this.accountRepo.findAccountByEmail(email).map(acc -> new MockAccountDTO(acc.getId(), acc.getFirstname(), acc.getLastname(), acc.getEmail()))
+                .orElseThrow(() -> {
+                    throw new EntityNotFoundException("Account entity with email " + email + " hasn't been found.");
+                });
+	}
 }

@@ -25,8 +25,9 @@ public class ElasticsearchConfig {
 						.create(c -> c.index(INDEX_NAME)
 								.mappings(m -> m.properties("query", p -> p.percolator(pp -> pp))
 										.properties("price", p -> p.double_(tt -> tt))
-										.properties("booktype", p -> p.keyword(kk -> kk))));
-				log.debug("Percolator 索引创建结果: " + response.acknowledged());
+										.properties("booktype", p -> p.keyword(kk -> kk))
+										.properties("email", p -> p.keyword(kk -> kk))));
+				log.debug("Percolator索引创建结果: " + response.acknowledged());
 			}
 		};
 	}

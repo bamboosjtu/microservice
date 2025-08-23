@@ -18,9 +18,18 @@ public class SearchPreferenceController {
 
     @PostMapping
     public ResponseEntity<Long> save(@RequestBody SearchPreferenceDTO dto) {
-        this.service.save(dto);
-        return ResponseEntity.ok().build();        
+        Long created = this.service.save(dto);
+        return ResponseEntity.ok().body(created);        
     }
 
+    @PostMapping("/bulk")
+    public ResponseEntity<Long> save(@RequestBody SearchPreferenceDTO[] dtos) {
+        Long count = 0L;
+        for(SearchPreferenceDTO dto: dtos) {
+        	this.service.save(dto);
+        	count++;
+        }
+        return ResponseEntity.ok().body(count);        
+    }
 
 }

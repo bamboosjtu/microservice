@@ -24,7 +24,7 @@ public class KafkaDispatcher {
 	public void send(BookDomainEvent bookCreatedEvent) {
 		String event = serialize(bookCreatedEvent);
 		template.send(bookTopic, event);
-		log.debug("Sending message {} to {}", event, bookTopic);
+		log.debug("发送消息： {} to {}", event, bookTopic);
 	}
 	
 	private String serialize(Object event) {
