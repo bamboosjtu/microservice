@@ -1,4 +1,4 @@
-# 图书推荐系统
+# 【练习】图书推荐系统
 
 [GITHUB 地址](https://github.com/lombocska/udemy-microservices-example/tree/master)
 
@@ -35,7 +35,7 @@
   - [x] listen on EmailNotificationTriggeredEvent
   - [x] send email with GOOGLE SMTP
 
-![sequence diagram](C:\Users\theTruth\Documents\projects\book-recommendation-system\sequence diagram.webp)
+![sequence diagram](./sequence diagram.webp)
 
 
 
